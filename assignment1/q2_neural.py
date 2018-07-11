@@ -40,7 +40,7 @@ def forward_backward_prop(X, labels, params, dimensions):
 
     # Note: compute cost based on `sum` not `mean`.
     ### YOUR CODE HERE: forward propagation
-    raise NotImplementedError
+    
     ### END YOUR CODE
 
     ### YOUR CODE HERE: backward propagation
