@@ -27,9 +27,9 @@ def forward_backward_prop(X, labels, params, dimensions):
     """
 
     ### Unpack network parameters (do not modify)
+    N = X.shape[0]
     ofs = 0
-    Dx, H, Dy = (dimensions[0], dimensions[1], dimensions[2])
-
+    Dx, H, Dy = (int(dimensions[0]), int(dimensions[1]),int(dimensions[2]))
     W1 = np.reshape(params[ofs:ofs+ Dx * H], (Dx, H))
     ofs += Dx * H
     b1 = np.reshape(params[ofs:ofs + H], (1, H))
@@ -40,11 +40,23 @@ def forward_backward_prop(X, labels, params, dimensions):
 
     # Note: compute cost based on `sum` not `mean`.
     ### YOUR CODE HERE: forward propagation
+    hidden = sigmoid(X.dot(W1)+b1)
+    scores = np.exp(hidden.dot(W2) + b2)
+    sum_scores = np.sum(scores,axis = 1)
+    correct_scores = scores[labels > 0]
+    cost = -np.sum(np.log(correct_scores/sum_scores))/N #+ reg*(np.sum(W1**2) + np.sum(W2**2))
+    
     
     ### END YOUR CODE
 
     ### YOUR CODE HERE: backward propagation
-    raise NotImplementedError
+    dS = scores/(sum_scores.reshape((-1,1)))
+    dS[labels > 0] -= 1
+    gradb2 = np.ones(N).dot(dS)/N
+    gradW2 = hidden.T.dot(dS)/N# + 2*reg*W2
+    dhidden = dS.dot(W2.T)
+    gradb1 = np.ones(N).dot(sigmoid_grad(hidden)*dhidden)/N
+    gradW1 = X.T.dot(sigmoid_grad(hidden)*dhidden)/N# + 2*reg*W1
     ### END YOUR CODE
 
     ### Stack gradients (do not modify)
@@ -59,20 +71,19 @@ def sanity_check():
     Set up fake data and parameters for the neural network, and test using
     gradcheck.
     """
-    print "Running sanity check..."
+    print ("Running sanity check...")
 
     N = 20
     dimensions = [10, 5, 10]
     data = np.random.randn(N, dimensions[0])   # each row will be a datum
     labels = np.zeros((N, dimensions[2]))
-    for i in xrange(N):
+    for i in range(N):
         labels[i, random.randint(0,dimensions[2]-1)] = 1
 
     params = np.random.randn((dimensions[0] + 1) * dimensions[1] + (
         dimensions[1] + 1) * dimensions[2], )
 
-    gradcheck_naive(lambda params:
-        forward_backward_prop(data, labels, params, dimensions), params)
+    gradcheck_naive(lambda params :forward_backward_prop(data, labels, params, dimensions), params)
 
 
 def your_sanity_checks():
@@ -82,12 +93,12 @@ def your_sanity_checks():
     This function will not be called by the autograder, nor will
     your additional tests be graded.
     """
-    print "Running your sanity checks..."
+    print ("Running your sanity checks...")
     ### YOUR CODE HERE
-    raise NotImplementedError
+    pass
     ### END YOUR CODE
 
 
 if __name__ == "__main__":
     sanity_check()
-    your_sanity_checks()
+#     your_sanity_checks()

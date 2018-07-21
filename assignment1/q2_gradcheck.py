@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 import numpy as np
 import random
@@ -37,10 +37,17 @@ def gradcheck_naive(f, x):
         # to test cost functions with built in randomness later.
 
         ### YOUR CODE HERE:
-        old_value = x[ix]
-        up_value = old_value + h
-        down_value = old_value - h
-        numgrad = (f(up_value)[0] - f(down_value)[0])/(2*h)
+
+        x[ix] += h
+        random.setstate(rndstate)
+        fx_plus, _ = f(x)
+
+        x[ix] -= 2*h
+        random.setstate(rndstate)
+        fx_minus, _ = f(x)
+
+        x[ix] += h
+        numgrad = (fx_plus - fx_minus) / (2 * h)
         ### END YOUR CODE
 
         # Compare gradients
